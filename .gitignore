@@ -1,32 +1,26 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# База данных
+*.db
+*.sqlite
+*.sqlite3
+
+# Переменные окружения
+.env
+.env.local
+.env.*.local
+
+# Тесты и кэш
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Виртуальное окружение
 .venv/
 venv/
-*.db
-*.sqlite3
-.idea/
-.vscode/
-*.log
-.env
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git
-.mypy_cache
-.pytest_cache
-.hypothesis
+ENV/
