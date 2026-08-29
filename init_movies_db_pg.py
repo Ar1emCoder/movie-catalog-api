@@ -7,14 +7,12 @@ load_dotenv()
 
 
 async def init_db():
-    # Берем строку подключения из .env (ту самую, что мы тестировали)
     db_url = os.getenv("DATABASE_URL")
-    logger.info(f"🔍 Подключение к PostgreSQL: {db_url}")
 
     try:
         # 2. Подключение через asyncpg
         conn = await asyncpg.connect(db_url)
-        logger.info("✅ Соединение установлено!")
+        logger.info("Соединение установлено!")
 
         # 3. Выполнение запросов на создание таблиц
         # Подсказка: используй await conn.execute(ЗАПРОС) для каждого из трех
@@ -45,16 +43,16 @@ async def init_db():
         """)
 
         # 4. УБРАЛ цикл проверки файла! Вместо него:
-        logger.info("✅ Таблицы успешно созданы в PostgreSQL!")
+        logger.info("Таблицы успешно созданы в PostgreSQL!")
 
         # После создания всех таблиц
         tables = await conn.fetch("SELECT tablename FROM pg_tables WHERE schemaname = 'public';")
-        logger.info(f"📋 Созданные таблицы: {[row['tablename'] for row in tables]}")
+        logger.info(f"Созданные таблицы: {[row['tablename'] for row in tables]}")
 
         await conn.close()
 
     except Exception as e:
-        logger.error(f"❌ Ошибка инициализации БД: {e}")
+        logger.error(f"Ошибка инициализации БД: {e}")
 
 
 
