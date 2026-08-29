@@ -3,7 +3,7 @@ import asyncio
 from pathlib import Path
 from logger import logger
 
-DB_PATH = (Path(__file__).parent / "movies.db").resolve()
+
 
 
 async def init_db():
