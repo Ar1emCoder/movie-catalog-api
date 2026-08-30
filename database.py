@@ -1,40 +1,52 @@
-import aiosqlite
+import asyncpg
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = "finance_tracker.db"
-
-# async def get_db():
-#     await aiosqlite.connect
-#     row_factory = aiosqlite.Row # Чтобы получать строки как словари
-#     return row_factory
+load_dotenv()
+db_pool: asyncpg.Pool = None
 
 
-async def create_user(username: str, email: str, age: int = None):
-    db = await aiosqlite.connect("finance_tracker.db")
-    cursor = await db.execute("INSERT INTO users (username) VALUES (?)", (username,))
-    await db.commit()
-    user_id = cursor.lastrowid  # Lastrowid - ID последней вставленной строки
-    await db.close()
-    return {"id": user_id, "username": username, "email": email, "age": age}
+async def init_db_pool():
+    global db_pool
+    database_url = os.getenv("DATABASE_URL_FINANCE")
+    db_pool = await asyncpg.create_pool(database_url, min_size=2, max_size=10)
+    print("Пул для Finance Tracker создан")
 
 
-async def get_user_by_id(user_id: int):
-    conn = await aiosqlite.connect("finance_tracker.db")
-    cursor = await conn.execute(
-        "SELECT id, username FROM users WHERE id = ?", (user_id,)
+async def close_db_pool():
+    global db_pool
+    if db_pool:
+        await db_pool.close()
+
+
+async def get_db():
+    async with db_pool.acquire() as connection:
+        yield connection
+
+
+async def create_user(db: asyncpg.Connection, username: str, email: str, age: int = None):
+    # Используем fetchrow, чтобы получить RETURNING id
+    row = await db.fetchrow(
+        "INSERT INTO users (username, email, age) VALUES ($1, $2, $3) RETURNING id",
+        username, email, age
     )
-    result = await cursor.fetchone()  # возвращает одну строку или None
-    if result is None:
+    return {
+        "id": row["id"],
+        "username": username,
+        "email": email,
+        "age": age
+    }
+
+
+async def get_user_by_id(db: asyncpg.Connection, user_id: int):
+    row = await db.fetchrow(
+        "SELECT id, username FROM users WHERE id = $1", user_id)
+    if row is None:
         return None
     else:
-        return {"id": result[0], "username": result[1]}
+        return {"id": row["id"], "username": row["username"]}
 
 
-async def get_all_users():
-    conn = await aiosqlite.connect("finance_tracker.db")
-    cursor = await conn.execute("SELECT id, username FROM users")
-    users = await cursor.fetchall()
-    await conn.close()
-    result = []
-    for row in users:
-        result.append([{"id": row[0], "username": row[1]}])
-    return result
+async def get_all_users(db: asyncpg.Connection):
+    rows = await db.fetch("SELECT id, username FROM users")
+    return [dict(row) for row in rows]
