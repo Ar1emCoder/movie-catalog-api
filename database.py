@@ -24,7 +24,7 @@ async def get_db():
         yield connection
 
 
-async def create_user(db: asyncpg.Connection, username: str, email: str, age: int = None):
+async def create_user(db: asyncpg.Connection, username: str, email: str, age: int | None = None):
     # Используем fetchrow, чтобы получить RETURNING id
     row = await db.fetchrow(
         "INSERT INTO users (username, email, age) VALUES ($1, $2, $3) RETURNING id",

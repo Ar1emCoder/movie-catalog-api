@@ -72,7 +72,7 @@ async def create_movie(movie: MovieCreate, db: asyncpg.Connection = Depends(get_
 
 @app.get("/movies/")
 async def read_movies(
-        skip: int = 0, limit: int = 100, genre: str = None, db: asyncpg.Connection = Depends(get_db)
+        skip: int = 0, limit: int = 100, genre: str | None = None, db: asyncpg.Connection = Depends(get_db)
 ):
     if genre:
         result = await get_movies_by_genre(db, genre, skip, limit)
